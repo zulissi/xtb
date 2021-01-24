@@ -322,32 +322,32 @@ subroutine peeq &
    call latp%getLatticePoints(trans, 40.0_wp)
    call getCoordinationNumber(mol, trans, 40.0_wp, cnType%erf, &
       & cn, dcndr, dcndL)
-   call cutCoordinationNumber(mol%n, cn, dcndr, dcndL, maxCN=8.0_wp)
+   call cutCoordinationNumber(mol%n, cn, dcndr, dcndL, maxCN=12.0_wp)
 
-   if (profile) call timer%measure(2)
-   if (profile) call timer%measure(4,"D4 Dispersion")
+   !if (profile) call timer%measure(2)
+   !if (profile) call timer%measure(4,"D4 Dispersion")
 ! ----------------------------------------
 !  D4 dispersion energy + gradient (2B) under pbc
 ! ----------------------------------------
-   call getENCharges(env, mol, cn, dcndr, dcndL, qeeq, dqdr, dqdL)
-   call env%check(exitRun)
-   if (exitRun) then
-      call env%error("Could not get EN charges for D4 dispersion", source)
-      return
-   end if
+   !call getENCharges(env, mol, cn, dcndr, dcndL, qeeq, dqdr, dqdL)
+   !call env%check(exitRun)
+   !if (exitRun) then
+   !   call env%error("Could not get EN charges for D4 dispersion", source)
+   !   return
+   !end if
 
-   call getCoordinationNumber(mol, trans, 40.0_wp, cnType%cov, &
-      & ccn, dccndr, dccndL)
-   call latp%getLatticePoints(trans, 60.0_wp)
-   call d4_gradient(mol, xtbData%dispersion%dispm, trans, xtbData%dispersion%dpar, &
-      & xtbData%dispersion%g_a, xtbData%dispersion%g_c, xtbData%dispersion%wf, &
-      & 60.0_wp, ccn, dccndr, dccndL, qeeq, dqdr, dqdL, ed, gradient, sigma)
+   !call getCoordinationNumber(mol, trans, 40.0_wp, cnType%cov, &
+   !   & ccn, dccndr, dccndL)
+   !call latp%getLatticePoints(trans, 60.0_wp)
+   !call d4_gradient(mol, xtbData%dispersion%dispm, trans, xtbData%dispersion%dpar, &
+   !   & xtbData%dispersion%g_a, xtbData%dispersion%g_c, xtbData%dispersion%wf, &
+   !   & 60.0_wp, ccn, dccndr, dccndL, qeeq, dqdr, dqdL, ed, gradient, sigma)
 
-   call env%check(exitRun)
-   if (exitRun) then
-      call env%error("Evaluation of dispersion energy failed", source)
-      return
-   end if
+   !call env%check(exitRun)
+   !if (exitRun) then
+   !   call env%error("Evaluation of dispersion energy failed", source)
+   !   return
+   !end if
 
    ! better save than sorry, delete the D4-EEQ charges
    qeeq(:) = 0.0_wp
@@ -373,35 +373,35 @@ subroutine peeq &
 
    if (profile) call timer%measure(3,"EEQ model density")
    ! names DO NOT corresponds to content of variables, obviously...
-   call gfn0_charge_model(chrgeq,mol%n,mol%at,xtbData%coulomb)
+   !call gfn0_charge_model(chrgeq,mol%n,mol%at,xtbData%coulomb)
    ! initialize electrostatic energy
-   if (allocated(gbsa)) then
-      call eeq_chrgeq(mol,env,chrgeq,gbsa,cn,dcndr,qeeq,dqdr, &
-         &            ees,gsolv,gradient,.false.,.true.,.true.)
-   else
-      nid = maxval(mol%id)
-      allocate(idnum(nid))
-      do ii = 1, nId
-         jat = 0
-         do iat = 1, mol%n
-            if (mol%id(iat) == ii) then
-               jat = iat
-               exit
-            end if
-         end do
-         idnum(ii) = mol%at(jat)
-      end do
-      allocate(chargeWidth(1, nid))
-      do ii = 1, nid
-         ati = idnum(ii)
-         chargeWidth(1, ii) = xtbData%coulomb%chargeWidth(ati)
-      end do
-      call init(coulomb, env, mol, chargeWidth)
-      call init(eeq, env, xtbData%coulomb%electronegativity, &
-         & xtbData%coulomb%kcn, xtbData%coulomb%chemicalHardness, num=idnum)
-      call eeq%chargeEquilibration(env, mol, coulomb, cn, dcndr, dcndL, &
-         & ees, gradient, sigma, qat=qeeq, dqdr=dqdr, dqdL=dqdL)
-   endif
+   !if (allocated(gbsa)) then
+   !   call eeq_chrgeq(mol,env,chrgeq,gbsa,cn,dcndr,qeeq,dqdr, &
+   !      &            ees,gsolv,gradient,.false.,.true.,.true.)
+   !else
+   !   nid = maxval(mol%id)
+   !   allocate(idnum(nid))
+   !   do ii = 1, nId
+   !      jat = 0
+   !      do iat = 1, mol%n
+   !         if (mol%id(iat) == ii) then
+   !            jat = iat
+   !            exit
+   !         end if
+   !      end do
+   !      idnum(ii) = mol%at(jat)
+   !   end do
+   !   allocate(chargeWidth(1, nid))
+   !   do ii = 1, nid
+   !      ati = idnum(ii)
+   !      chargeWidth(1, ii) = xtbData%coulomb%chargeWidth(ati)
+   !   end do
+   !   call init(coulomb, env, mol, chargeWidth)
+   !   call init(eeq, env, xtbData%coulomb%electronegativity, &
+   !      & xtbData%coulomb%kcn, xtbData%coulomb%chemicalHardness, num=idnum)
+   !   call eeq%chargeEquilibration(env, mol, coulomb, cn, dcndr, dcndL, &
+   !      & ees, gradient, sigma, qat=qeeq, dqdr=dqdr, dqdL=dqdL)
+   !endif
 
    call env%check(exitRun)
    if (exitRun) then
